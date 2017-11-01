@@ -17,8 +17,7 @@ def leis_recentes(ano_apresentacao):
     será possível pegar só os dados mais recentes.
     '''
     leis_ids = []
-    camara_request = f'https://dadosabertos.camara.leg.br/api/v2/\
-    proposicoes?ano={ano_apresentacao}&itens=100'
+    camara_request = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes?ano={ano_apresentacao}&itens=100'
     r = request.urlopen(camara_request, context=certificate)
     list_end = True
     while not list_end:
