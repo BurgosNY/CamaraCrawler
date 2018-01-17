@@ -19,7 +19,8 @@ def leis_recentes(ano_apresentacao):
     """
 
     leis_ids = []
-    camara_request = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes?ano={ano_apresentacao}&itens=100'
+    camara_request = (f'https://dadosabertos.camara.leg.br/api/v2'
+                      f'/proposicoes?ano={ano_apresentacao}&itens=100')
     r = request.urlopen(camara_request, context=certificate)
     list_end = False
     while not list_end:
@@ -35,7 +36,7 @@ def leis_recentes(ano_apresentacao):
     return leis_ids
 
 
-def upload_leis(lista_de_leisIDs):
+def upload_leis(lista_de_leis_ids):
     """Busca os detalhes para cada registro, partindo da lista de IDs.
 
     Usando o Schema do Models e a API dos dados abertos para padronizar
@@ -43,10 +44,10 @@ def upload_leis(lista_de_leisIDs):
     """
 
     # TODO: ver se é necessário fazer connect(db='CamaraFederal')
-    for prop in lista_de_leisIDs:
-        r = request.urlopen(f'https://dadosabertos.camara.leg.br/api/v2/\
-            proposicoes/{prop}', context=certificate).read()
-        prop_j = json.loads(r)
+    for prop in lista_de_leis_ids:
+        url = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes/{prop}'
+        response = request.urlopen(url, context=certificate).read()
+        prop_j = json.loads(response)
         data = prop_j['dados']
         novaLei = Lei(
             leiId=prop,
@@ -82,7 +83,7 @@ def leis_to_string():
 
 
 if __name__ == '__main__':
-    ano_busca = input('Para qual ano você deseja buscar as leis? Ex: 2017 \n> ')
+    ano_busca = input('Para qual ano deseja buscar as leis? Ex: 2017 \n> ')
     leis_para_parsear = leis_recentes(ano_busca)
     upload_leis(leis_para_parsear)
     leis_to_string()

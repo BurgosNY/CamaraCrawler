@@ -1,4 +1,4 @@
-from pendulum import parse, now
+from pendulum import now
 from mongoengine import Document, IntField, DateTimeField, StringField,\
  DictField, URLField, connect
 
