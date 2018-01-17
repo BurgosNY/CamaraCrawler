@@ -19,9 +19,9 @@ def leis_recentes(ano_apresentacao):
     leis_ids = []
     camara_request = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes?ano={ano_apresentacao}&itens=100'
     r = request.urlopen(camara_request, context=certificate)
-    list_end = True
+    list_end = False
     while not list_end:
-        # TO DO: Usar "yeld" e não usar exceção.
+        # TODO: usar "yield" e não usar exceção.
         r = request.urlopen(camara_request, context=certificate)
         leis = json.loads(r.read())
         leis_ids += [lei['id'] for lei in leis['dados']]
@@ -38,7 +38,7 @@ def upload_leis(lista_de_leisIDs):
     Usando o Schema do Models e a API dos dados abertos para padronizar
     os projetos de lei e subir todos em um banco de dados
     '''
-    # TO DO: ver se é necessário fazer connect(db='CamaraFederal')
+    # TODO: ver se é necessário fazer connect(db='CamaraFederal')
     for prop in lista_de_leisIDs:
         r = request.urlopen(f'https://dadosabertos.camara.leg.br/api/v2/\
             proposicoes/{prop}', context=certificate).read()
@@ -56,7 +56,7 @@ def upload_leis(lista_de_leisIDs):
             uriAutores=data['uriAutores'],
             tipoAutor=data['tipoAutor'],
             siglaTipo=data['siglaTipo']
-            # TO DO: Ver se é necessário passar o "atualizado"
+            # TODO: ver se é necessário passar o "atualizado"
         )
         novaLei.save()
 
@@ -65,8 +65,8 @@ def leis_to_string():
     '''
     AVISO: Essa função leva .4 segundos por lei. Pode demorar bastante
     se estiver baixando várias. Apenas tualiza leis sem texto.
-    TO DO: Usar async // Usar aiohttp Library
     '''
+    # TODO: usar async (aiohttp ou alguma outra)
     for lei in Lei.objects(texto__exists=0):
         try:
             txt_lei = PdfToString(lei.urlInteiroTeor).convert()
