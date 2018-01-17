@@ -10,12 +10,14 @@ certificate = ssl._create_unverified_context()
 
 
 def leis_recentes(ano_apresentacao):
-    '''
+    """Importa do site de dados abertos a listagem das leis para o ano selecionado.
+
     Usa a API de dados abertos da Câmara para ver as leis apresentadas
     recentemente. Quando a API for melhorada
     (issue: https://github.com/labhackercd/dados-abertos/issues/102)
     será possível pegar só os dados mais recentes.
-    '''
+    """
+
     leis_ids = []
     camara_request = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes?ano={ano_apresentacao}&itens=100'
     r = request.urlopen(camara_request, context=certificate)
@@ -34,10 +36,12 @@ def leis_recentes(ano_apresentacao):
 
 
 def upload_leis(lista_de_leisIDs):
-    '''
+    """Busca os detalhes para cada registro, partindo da lista de IDs.
+
     Usando o Schema do Models e a API dos dados abertos para padronizar
     os projetos de lei e subir todos em um banco de dados
-    '''
+    """
+
     # TODO: ver se é necessário fazer connect(db='CamaraFederal')
     for prop in lista_de_leisIDs:
         r = request.urlopen(f'https://dadosabertos.camara.leg.br/api/v2/\
@@ -62,10 +66,12 @@ def upload_leis(lista_de_leisIDs):
 
 
 def leis_to_string():
-    '''
+    """Executa módulo para transformar PDFs em strings na falta de texto no site.
+
     AVISO: Essa função leva .4 segundos por lei. Pode demorar bastante
-    se estiver baixando várias. Apenas tualiza leis sem texto.
-    '''
+    se estiver baixando várias. Apenas atualiza leis sem texto.
+    """
+
     # TODO: usar async (aiohttp ou alguma outra)
     for lei in Lei.objects(texto__exists=0):
         try:

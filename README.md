@@ -10,7 +10,9 @@ Depois, instale o MongoDB. O jeito mais fácil é via homebrew
 (`brew install mongo`), caso você esteja no Mac OS X. Se optar por fazer de
 outra forma, [siga a
 documentação](https://docs.mongodb.com/manual/installation/). Inicie uma
-instância local na sua máquina via brew ou pelo comando `mongod`.
+instância local na sua máquina via brew ou pelo comando `mongod` ou
+`brew services start mongo`.
+
 
 ## Dependências Python
 

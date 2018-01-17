@@ -3,11 +3,13 @@ from bs4 import BeautifulSoup
 
 
 class PdfToString:
-    '''Transforms a PDF file into a string. Can use a remote (URL)
-    or local file location. There's an option to save the file.
-    Set a timeout for when to stop retrieving the data.
-    '''
-    # TO DO: Implement better timeout method, use "yeld"
+    """Transforma um arquivo PDF em texto.
+
+    Pode utilizar um endereço remoto (URL) ou um arquivo local.
+    Existe uma opção para salvar o arquivo PDF localmente e para
+    definir o tempo de espera até cancelar a busca.
+    """
+    # TODO: implementar um método melhor para timeout, usar 'yield'
 
     def __init__(self, location, save=False, filename="pdf_file.pdf"):
         self.location = location
@@ -15,11 +17,11 @@ class PdfToString:
         self.filename = filename
 
     def download(self):
-        ''' Use only if the file is located on the web:
-        '''
+        """Executa o download, usada apenas se o conteudo estiver na Web."""
+
         import urllib
         try:
-            # TO DO: Find a way to have the type specified in the request (
+            # TODO: identificar uma maneira de definir o tipo na req (
             # .doc or .pdf)
             urllib.request.urlretrieve(self.location, self.filename)
             print(f'file saved as {self.filename}')
@@ -27,9 +29,13 @@ class PdfToString:
             raise UrlError('Download error. Check the url or the connection.')
 
     def convert(self):
-        ''' Downloads a PDF file, parse it with BeautifulSoup and transform
-        it to a String. Uses textract: http://textract.readthedocs.io/en/stable/
-        '''
+        """Converte o PDF baixado anteriormente.
+
+        Faz download de um arquivo PDF, executa o 'parser' do BeautifulSoup
+        e transforma o mesmo em uma 'string' utilizando o textract:
+        http://textract.readthedocs.io/en/stable/
+        """
+
         import textract
         source_file = self.download()
         try:
@@ -38,12 +44,11 @@ class PdfToString:
             soup = BeautifulSoup(source_binary, "html.parser")
             text_string = soup.prettify(formatter=None)
         except textract.exceptions.ShellError:
-            # TO DO: Implement a way to handle non-pdf files
+            # TODO: implementar uma maneira de lidar com arquivos nao PDF.
             print('Not a pdf')
             raise NameError('The file is not a .pdf')
 
-
-        # Deletes the file if not explicitly set to save
+        # Apaga o arquivo baixado caso não esteja explícito para salvar
         if not self.save:
             os.remove(self.filename)
         return text_string
