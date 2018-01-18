@@ -1,0 +1,4 @@
+mongoengine
+pendulum
+beautifulsoup4
+textract

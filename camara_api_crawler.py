@@ -10,18 +10,21 @@ certificate = ssl._create_unverified_context()
 
 
 def leis_recentes(ano_apresentacao):
-    '''
+    """Importa do site de dados abertos a listagem das leis para o ano selecionado.
+
     Usa a API de dados abertos da Câmara para ver as leis apresentadas
     recentemente. Quando a API for melhorada
     (issue: https://github.com/labhackercd/dados-abertos/issues/102)
     será possível pegar só os dados mais recentes.
-    '''
+    """
+
     leis_ids = []
-    camara_request = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes?ano={ano_apresentacao}&itens=100'
+    camara_request = (f'https://dadosabertos.camara.leg.br/api/v2'
+                      f'/proposicoes?ano={ano_apresentacao}&itens=100')
     r = request.urlopen(camara_request, context=certificate)
-    list_end = True
+    list_end = False
     while not list_end:
-        # TO DO: Usar "yeld" e não usar exceção.
+        # TODO: usar "yield" e não usar exceção.
         r = request.urlopen(camara_request, context=certificate)
         leis = json.loads(r.read())
         leis_ids += [lei['id'] for lei in leis['dados']]
@@ -33,16 +36,18 @@ def leis_recentes(ano_apresentacao):
     return leis_ids
 
 
-def upload_leis(lista_de_leisIDs):
-    '''
+def upload_leis(lista_de_leis_ids):
+    """Busca os detalhes para cada registro, partindo da lista de IDs.
+
     Usando o Schema do Models e a API dos dados abertos para padronizar
     os projetos de lei e subir todos em um banco de dados
-    '''
-    # TO DO: ver se é necessário fazer connect(db='CamaraFederal')
-    for prop in lista_de_leisIDs:
-        r = request.urlopen(f'https://dadosabertos.camara.leg.br/api/v2/\
-            proposicoes/{prop}', context=certificate).read()
-        prop_j = json.loads(r)
+    """
+
+    # TODO: ver se é necessário fazer connect(db='CamaraFederal')
+    for prop in lista_de_leis_ids:
+        url = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes/{prop}'
+        response = request.urlopen(url, context=certificate).read()
+        prop_j = json.loads(response)
         data = prop_j['dados']
         novaLei = Lei(
             leiId=prop,
@@ -56,17 +61,19 @@ def upload_leis(lista_de_leisIDs):
             uriAutores=data['uriAutores'],
             tipoAutor=data['tipoAutor'],
             siglaTipo=data['siglaTipo']
-            # TO DO: Ver se é necessário passar o "atualizado"
+            # TODO: ver se é necessário passar o "atualizado"
         )
         novaLei.save()
 
 
 def leis_to_string():
-    '''
+    """Executa módulo para transformar PDFs em strings na falta de texto no site.
+
     AVISO: Essa função leva .4 segundos por lei. Pode demorar bastante
-    se estiver baixando várias. Apenas tualiza leis sem texto.
-    TO DO: Usar async // Usar aiohttp Library
-    '''
+    se estiver baixando várias. Apenas atualiza leis sem texto.
+    """
+
+    # TODO: usar async (aiohttp ou alguma outra)
     for lei in Lei.objects(texto__exists=0):
         try:
             txt_lei = PdfToString(lei.urlInteiroTeor).convert()
@@ -76,7 +83,7 @@ def leis_to_string():
 
 
 if __name__ == '__main__':
-    ano_busca = input('Para qual ano você deseja buscar as leis? Ex: 2017 \n> ')
+    ano_busca = input('Para qual ano deseja buscar as leis? Ex: 2017 \n> ')
     leis_para_parsear = leis_recentes(ano_busca)
     upload_leis(leis_para_parsear)
     leis_to_string()
