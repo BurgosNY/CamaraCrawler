@@ -55,7 +55,6 @@ def upload_leis(lista_de_leisIDs):
         prop_j = json.loads(r)
         #print(prop_j)
         data = prop_j['dados']
-        print(data)
         novaLei = Lei(
             leiId=prop,
             numero=data['numero'],
