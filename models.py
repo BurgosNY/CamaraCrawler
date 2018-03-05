@@ -1,9 +1,7 @@
-from pendulum import parse, now
+from pendulum import now
 from mongoengine import Document, IntField, DateTimeField, StringField,\
  DictField, URLField, connect
 
-# Você precisa ter uma instância mongodb rodando na sua máquina. Método mais recomendado: >
-# brew install mongo && brew services start mongo
 
 # conecta a uma instância local do MongoDB, no database 'CamaraFederal'.
 # Os documentos irão para essa DB, na coleção "lei"
