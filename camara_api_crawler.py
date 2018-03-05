@@ -1,4 +1,4 @@
-from urllib import request
+from urllib.request import urlopen, Request
 import ssl
 import json
 from pendulum import parse
@@ -19,21 +19,30 @@ def leis_recentes(ano_apresentacao):
     """
 
     leis_ids = []
-    camara_request = (f'https://dadosabertos.camara.leg.br/api/v2'
-                      f'/proposicoes?ano={ano_apresentacao}&itens=100')
-    r = request.urlopen(camara_request, context=certificate)
-    list_end = False
-    while not list_end:
-        # TODO: usar "yield" e não usar exceção.
-        r = request.urlopen(camara_request, context=certificate)
+
+    # link da primeira página
+    camara_request = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes?ano={ano_apresentacao}&pagina=1&itens=100'
+    # add cabeçalho para api retornar json
+    req = Request(camara_request)
+    req.add_header('accept','application/json')
+    
+    list_end = True
+
+    while list_end:        
+        r = urlopen(req, context=certificate)
         leis = json.loads(r.read())
-        leis_ids += [lei['id'] for lei in leis['dados']]
-        try:
-            next_page = next(x for x in leis['links'] if x['rel'] == 'next')
-            camara_request = next_page['href']
-        except StopIteration:
-            list_end = True
-    return leis_ids
+        # yield lei id
+        for lei in leis['dados']:
+            yield lei['id']
+        # verifica se última página
+        if 'next' not in [x['rel'] for x in leis['links']]:
+            list_end =False
+            continue
+        # captura o link da próxima página 
+        next_page = next(x for x in leis['links'] if x['rel'] == 'next')
+        camara_request = next_page['href']
+        req = Request(camara_request)
+        req.add_header('accept','application/json')
 
 
 def upload_leis(lista_de_leis_ids):
@@ -42,12 +51,12 @@ def upload_leis(lista_de_leis_ids):
     Usando o Schema do Models e a API dos dados abertos para padronizar
     os projetos de lei e subir todos em um banco de dados
     """
-
-    # TODO: ver se é necessário fazer connect(db='CamaraFederal')
-    for prop in lista_de_leis_ids:
-        url = f'https://dadosabertos.camara.leg.br/api/v2/proposicoes/{prop}'
-        response = request.urlopen(url, context=certificate).read()
-        prop_j = json.loads(response)
+    # TO DO: ver se é necessário fazer connect(db='CamaraFederal')
+    for prop in lista_de_leisIDs:
+        req = Request(f'https://dadosabertos.camara.leg.br/api/v2/proposicoes/{prop}')
+        req.add_header('accept','application/json')
+        r = urlopen(req, context=certificate).read()
+        prop_j = json.loads(r)        
         data = prop_j['dados']
         novaLei = Lei(
             leiId=prop,
